@@ -28,8 +28,28 @@ public:
   ///* state covariance matrix
   MatrixXd P_;
 
+  MatrixXd Xsig_;
+
+  VectorXd x_aug_;
+
+  MatrixXd P_aug_;
+
+  MatrixXd XsigAug_;
+
   ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
+
+  VectorXd radarz_pred_;
+
+  MatrixXd radarS_;
+
+  MatrixXd radarZsig_;
+
+  VectorXd lidarz_pred_;
+
+  MatrixXd lidarS_;
+
+  MatrixXd lidarZsig_;
 
   ///* time when the state is true, in us
   long long time_us_;
@@ -67,6 +87,12 @@ public:
   ///* Sigma point spreading parameter
   double lambda_;
 
+  double NIS_laser_;
+  double NIS_radar_;
+
+  int radar_n_;
+
+  int lidar_n_;
 
   /**
    * Constructor
@@ -102,11 +128,22 @@ public:
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+  
+  void GenerateSigmaPoints();
+  void AugmentedSigmaPoints();
+  void SigmaPointPrediction(const double &delta_t);
+  void PredictMeanAndCovariance() ;
+  void PredictRadarMeasurement();
+  void PredictLidarMeasurement();
+    
+  void setX(const double &r,const  double &p ,const  double &rr);
+  void setX(const double &x,const  double &y);
 
-  void GenerateSigmaPoints(MatrixXd* Xsig_out);
-  void AugmentedSigmaPoints(MatrixXd* Xsig_out);
-  void SigmaPointPrediction(MatrixXd* Xsig_out, const double &delta_t,const MatrixXd& Xsig_aug);
-  void PredictMeanAndCovariance(VectorXd* x_out, MatrixXd* P_out ) ;
+  MatrixXd squareMat(const MatrixXd& mat) const;
+  double processTime(const long long &t);
+
+  void err(const std::string& ) const;
+  double normalize(const double &) const;
 };
 
 #endif /* UKF_H */
