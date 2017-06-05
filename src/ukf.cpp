@@ -31,25 +31,25 @@ UKF::UKF() {
   P_ = MatrixXd(n_x_, n_x_);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 2;
+  std_a_ = 7;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 0.2;
+  std_yawdd_ = 0.55;
 
   // Laser measurement noise standard deviation position1 in m
-  std_laspx_ = 0.15;
+  std_laspx_ = 0.05;
 
   // Laser measurement noise standard deviation position2 in m
-  std_laspy_ = 0.15;
+  std_laspy_ = 0.05;
 
   // Radar measurement noise standard deviation radius in m
-  std_radr_ = 0.3;
+  std_radr_ = 0.2;
 
   // Radar measurement noise standard deviation angle in rad
-  std_radphi_ = 0.03;
+  std_radphi_ = 0.02;
 
   // Radar measurement noise standard deviation radius change in m/s
-  std_radrd_ = 0.1;
+  std_radrd_ = 0.15;
 
   /**
   TODO:
@@ -60,14 +60,14 @@ UKF::UKF() {
   */
 
   x_ = VectorXd(n_x_);
-  x_ << 0.1,0.1,0.1,0.1,0.1;
+  x_ << 0.1,0.1,0,0,0;
 
   P_ = MatrixXd(n_x_,n_x_);
-  P_ << 0.01, 0, 0, 0, 0,
-        0, 0.01, 0, 0, 0,
-        0, 0, 0.01, 0, 0,
-        0, 0, 0, 0.01, 0,
-        0, 0, 0, 0, 0.01;
+  P_ << 0.08, 0, 0, 0, 0,
+        0, 0.08, 0, 0, 0,
+        0, 0, 0.08, 0, 0,
+        0, 0, 0, 0.08, 0,
+        0, 0, 0, 0, 0.08;
 
   Xsig_ =  MatrixXd(n_x_, 2 * n_x_ + 1);
   Xsig_.fill(0.0);
@@ -216,7 +216,7 @@ MatrixXd UKF::squareMat(const MatrixXd& mat) const
 
 void UKF::GenerateSigmaPoints() 
 {
-  MatrixXd A = squareMat(P_);
+  MatrixXd A = P_.llt().matrixL();
   //set first column of sigma point matrix
   Xsig_.col(0)  = x_;
 
@@ -242,7 +242,7 @@ void UKF::AugmentedSigmaPoints()
   P_aug_(6,6) = std_yawdd_*std_yawdd_;
 
   //create square root matrix
-  MatrixXd L = squareMat(P_aug_);
+  MatrixXd L = P_aug_.llt().matrixL();
 
   //create augmented sigma points
   XsigAug_.col(0)  = x_aug_;
@@ -304,11 +304,13 @@ void UKF::SigmaPointPrediction(const double &delta_t)
 
 void UKF::PredictMeanAndCovariance() 
 {
+  x_.fill(0.0);
   for (int i = 0; i < 2 * n_aug_ + 1; i++) 
   {  //iterate over sigma points
     x_ = x_ + weights_(i) * Xsig_pred_.col(i);
   }
 
+  P_.fill(0.0);
   for (int i = 0; i < 2 * n_aug_ + 1; i++) 
   {  
     // state difference
