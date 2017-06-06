@@ -94,6 +94,10 @@ public:
 
   int lidar_n_;
 
+  MatrixXd R_lidar_;
+  MatrixXd R_radar_;
+
+
   /**
    * Constructor
    */
@@ -138,10 +142,7 @@ public:
     
   void setX(const double &r,const  double &p ,const  double &rr);
   void setX(const double &x,const  double &y);
-
-  MatrixXd squareMat(const MatrixXd& mat) const;
   double processTime(const long long &t);
-
   void err(const std::string& ) const;
   double normalize(const double &) const;
 };
